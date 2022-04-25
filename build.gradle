@@ -1,0 +1,56 @@
+// Generic Gradle project
+
+apply plugin: 'java'
+apply plugin: 'com.google.protobuf'
+
+sourceCompatibility = '1.8'
+
+repositories {
+    jcenter()
+    mavenCentral()
+}
+
+buildscript {
+    repositories {
+        jcenter()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.11'
+    }
+}
+
+dependencies {
+    implementation 'com.google.protobuf:protobuf-javalite:3.20.0'
+    implementation 'org.conscrypt:conscrypt-openjdk-uber:2.5.2'
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.bouncycastle:bcprov-jdk15on:1.70'
+    testImplementation 'org.conscrypt:conscrypt-openjdk-uber:2.5.2'
+}
+
+protobuf {
+    protoc {
+        artifact = 'com.google.protobuf:protoc:3.8.0'
+    }
+    generateProtoTasks {
+        all().each { task ->
+            task.builtins {
+                java {
+                    option "lite"
+                }
+            }
+        }
+    }
+}
+
+jar {
+    from {
+    configurations.compile.collect {
+        it.isDirectory() ? it : zipTree(it)
+    }
+}
+    exclude 'META-INF/BC1024KE.DSA', 'META-INF/BC1024KE.SF','META-INF/BC2048KE.DSA'
+    manifest {
+        attributes 'Main-Class': 'com.android.apksigner.ApkSignerTool'
+    }
+}
